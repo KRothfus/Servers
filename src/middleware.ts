@@ -1,7 +1,14 @@
-import middleware from "express";
-export function middlewareLogResponses(){
+import {Request, Response, NextFunction } from "express";
+import {config} from "./config.js";
 
-}
+export function middlewareLogResponses(req: Request, res: Response, next: NextFunction){
+    res.on('finish', () => {
+        if (res.statusCode >= 400) {
+            console.log(`[NON-OK] ${req.method} ${req.originalUrl} - Status: ${res.statusCode}`);
+        }
+})
+    next();
+};
 // streak 2
 // streak 3
 // streak 4
@@ -9,3 +16,12 @@ export function middlewareLogResponses(){
 // streak 6
 // streak 7
 // streak 8
+
+
+export function middlewareMetricsInc(req: Request, res: Response, next: NextFunction){
+    config.fileserverHits += 1;
+    next();
+}
+
+export function middlewareMetricsIncWrite(req: Request, res: Response){
+    res.json({fileserverHits: config.fileserverHits});
