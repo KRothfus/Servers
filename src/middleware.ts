@@ -25,3 +25,4 @@ export function middlewareMetricsInc(req: Request, res: Response, next: NextFunc
 
 export function middlewareMetricsIncWrite(req: Request, res: Response){
     res.json({fileserverHits: config.fileserverHits});
+    // streak 9
