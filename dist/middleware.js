@@ -1,12 +1,12 @@
+import { config } from "./config.js";
 export function middlewareLogResponses(req, res, next) {
-    res.on('finish', () => {
+    res.on("finish", () => {
         if (res.statusCode >= 400) {
             console.log(`[NON-OK] ${req.method} ${req.originalUrl} - Status: ${res.statusCode}`);
         }
     });
     next();
 }
-;
 // streak 2
 // streak 3
 // streak 4
@@ -14,3 +14,21 @@ export function middlewareLogResponses(req, res, next) {
 // streak 6
 // streak 7
 // streak 8
+export function middlewareMetricsInc(req, res, next) {
+    config.fileserverHits += 1;
+    next();
+}
+export function handlerWrite(req, res) {
+    res.type('html').send(`<html>
+  <body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited ${config.fileserverHits} times!</p>
+  </body>
+</html>`);
+    // streak 9
+    // streak 10
+}
+export function handlerReset(req, res) {
+    config.fileserverHits = 0;
+    handlerWrite(req, res);
+}
