@@ -1,6 +1,6 @@
 import express from "express";
 import { handlerReadiness } from "./healthz.js";
-import { handlerReset, handlerWrite, middlewareLogResponses, middlewareMetricsInc, validateChirp } from "./middleware.js";
+import { chirpHandler, handlerReset, handlerWrite, middlewareLogResponses, middlewareMetricsInc } from "./middleware.js";
 const app = express();
 const PORT = 8080;
 // Attach logging and metrics middleware before static file serving so
@@ -15,4 +15,4 @@ app.get("/api/healthz", handlerReadiness);
 // app.get("/app", middlewareMetricsInc)
 app.get("/admin/metrics", handlerWrite);
 app.post("/admin/reset", handlerReset);
-app.post("/api/validate_chirp", validateChirp);
+app.post("/api/validate_chirp", chirpHandler);

@@ -39,7 +39,6 @@ export function chirpHandler(req, res) {
     });
     req.on("end", () => {
         try {
-            const data = JSON.parse(body);
             validateChirp(req, res);
             return;
         }
@@ -51,9 +50,14 @@ export function chirpHandler(req, res) {
 }
 export function validateChirp(req, res) {
     const data = req.body;
-    if (!data.body || data.body.length === 0 || data.body.length > 140) {
-        res.status(400).json({ error: "Chip is too long" });
+    //   if (!data.body || data.body.length === 0) {
+    //     res.status(400).send({ valid: "Chirp is empty" });
+    //     return false;
+    //   }
+    if (data.body.length > 140) {
+        res.status(400).send({ valid: "Chirp is too long" });
         return false;
     }
-    res.status(200).json({ valid: true });
+    const body = JSON.stringify({ valid: "true" });
+    res.status(200).send({ body: body });
 }
