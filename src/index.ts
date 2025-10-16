@@ -1,6 +1,6 @@
 import express from "express";
 import { handlerReadiness } from "./healthz.js";
-import { chirpHandler, handlerReset, handlerWrite, middlewareLogResponses, middlewareMetricsInc, validateChirp } from "./middleware.js";
+import {handlerChirpsValidate, handlerReset, handlerWrite, middlewareLogResponses, middlewareMetricsInc} from "./middleware.js";
 import { config } from "./config.js";
 
 
@@ -11,6 +11,7 @@ const PORT = 8080;
 // requests to /app are both logged and counted.
 app.use(middlewareLogResponses);
 app.use("/app",middlewareMetricsInc);
+app.use(express.json());
 
 app.use("/app", express.static("./src/app"));
 
@@ -22,4 +23,4 @@ app.get("/api/healthz", handlerReadiness);
 // app.get("/app", middlewareMetricsInc)
 app.get("/admin/metrics", handlerWrite)
 app.post("/admin/reset", handlerReset)
-app.post("/api/validate_chirp", chirpHandler)
+app.post("/api/validate_chirp", handlerChirpsValidate)

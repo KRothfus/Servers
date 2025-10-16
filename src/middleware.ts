@@ -1,6 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { config } from "./config.js";
 
+export function respondWithError(res: Response, code: number, message: string) {
+  respondWithJSON(res, code, { error: message });
+}
+
+export function respondWithJSON(res: Response, code: number, payload: any) {
+  res.header("Content-Type", "application/json");
+  const body = JSON.stringify(payload);
+  res.status(code).send(body);
+}
+
 export function middlewareLogResponses(
   req: Request,
   res: Response,
@@ -48,36 +58,31 @@ export function handlerReset(req: Request, res: Response) {
   handlerWrite(req, res);
 }
 
-export function chirpHandler(req: Request, res: Response) {
-  let body = "";
-  req.on("data", (chunk) => {
-    body += chunk;
-  });
-
-  req.on("end", () => {
-    try {
-      validateChirp(req, res);
-      return;
-    } catch (e) {
-      res.status(400).json({ error: "Invalid JSON" });
-      return;
+function cleanedBody(body: string): string {
+    const splitBody = body.split(" ");
+    for (let i = 0; i < splitBody.length; i++) {
+        if (["kerfuffle", "sharbert", "fornax"].includes(splitBody[i].toLowerCase())) {
+            splitBody[i] = "****";
+        }
     }
-  });
+    return splitBody.join(" ");
 }
 
-export function validateChirp(req: Request, res: Response) {
-  type chirpData = {
+// streak 11
+export async function handlerChirpsValidate(req: Request, res: Response) {
+  type parameters = {
     body: string;
   };
-  const data: chirpData = req.body ;
-//   if (!data.body || data.body.length === 0) {
-//     res.status(400).send({ valid: "Chirp is empty" });
-//     return false;
-//   }
-  if (data.body.length > 140) {
-    res.status(400).send({ valid: "Chirp is too long" });
-    return false;
+
+   const params: parameters = req.body;
+
+  const maxChirpLength = 140;
+  if (params.body.length > maxChirpLength) {
+    respondWithError(res, 400, "Chirp is too long");
+    return;
   }
-  const body = JSON.stringify({ valid: "true" });
-  res.status(200).send({body: body});
+
+  respondWithJSON(res, 200, {
+    cleanedBody: cleanedBody(params.body)   ,
+  });
 }

@@ -1,4 +1,12 @@
 import { config } from "./config.js";
+export function respondWithError(res, code, message) {
+    respondWithJSON(res, code, { error: message });
+}
+export function respondWithJSON(res, code, payload) {
+    res.header("Content-Type", "application/json");
+    const body = JSON.stringify(payload);
+    res.status(code).send(body);
+}
 export function middlewareLogResponses(req, res, next) {
     res.on("finish", () => {
         if (res.statusCode >= 400) {
@@ -32,32 +40,23 @@ export function handlerReset(req, res) {
     config.fileserverHits = 0;
     handlerWrite(req, res);
 }
-export function chirpHandler(req, res) {
-    let body = "";
-    req.on("data", (chunk) => {
-        body += chunk;
-    });
-    req.on("end", () => {
-        try {
-            validateChirp(req, res);
-            return;
+function cleanedBody(body) {
+    const splitBody = body.split(" ");
+    for (let i = 0; i < splitBody.length; i++) {
+        if (["kerfuffle", "sharbert", "fornax"].includes(splitBody[i].toLowerCase())) {
+            splitBody[i] = "****";
         }
-        catch (e) {
-            res.status(400).json({ error: "Invalid JSON" });
-            return;
-        }
-    });
-}
-export function validateChirp(req, res) {
-    const data = req.body;
-    //   if (!data.body || data.body.length === 0) {
-    //     res.status(400).send({ valid: "Chirp is empty" });
-    //     return false;
-    //   }
-    if (data.body.length > 140) {
-        res.status(400).send({ valid: "Chirp is too long" });
-        return false;
     }
-    const body = JSON.stringify({ valid: "true" });
-    res.status(200).send({ body: body });
+    return splitBody.join(" ");
+}
+export async function handlerChirpsValidate(req, res) {
+    const params = req.body;
+    const maxChirpLength = 140;
+    if (params.body.length > maxChirpLength) {
+        respondWithError(res, 400, "Chirp is too long");
+        return;
+    }
+    respondWithJSON(res, 200, {
+        cleanedBody: cleanedBody(params.body),
+    });
 }
