@@ -18,7 +18,7 @@ app.use("/app", express.static("./src/app"));
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}/app`);
 });
-
+// streak
 app.get("/api/healthz", handlerReadiness);
 // app.get("/app", middlewareMetricsInc)
 app.get("/admin/metrics", handlerWrite)
