@@ -1,19 +1,34 @@
 import express from "express";
 import { handlerReadiness } from "./healthz.js";
-import {handlerChirpsValidate, handlerReset, handlerWrite, middlewareLogResponses, middlewareMetricsInc} from "./middleware.js";
+import {
+  handlerChirpsValidate,
+  handlerReset,
+  handlerWrite,
+  middlewareLogResponses,
+  middlewareMetricsInc,
+} from "./middleware/middleware.js";
 import { config } from "./config.js";
-
-
+import { error } from "console";
+import { errorHandler } from "./middleware/errorhandling.js";
+import { APIConfig } from "./config.js";
 const app = express();
 const PORT = 8080;
 
 // Attach logging and metrics middleware before static file serving so
 // requests to /app are both logged and counted.
+function envThrow(key: APIConfig){
+  if (!key.dbURL){
+    throw new Error("DB_URL is not defined in environment variables");
+  }
+  return
+}
+envThrow(config);
 app.use(middlewareLogResponses);
-app.use("/app",middlewareMetricsInc);
+app.use("/app", middlewareMetricsInc);
 app.use(express.json());
 
 app.use("/app", express.static("./src/app"));
+
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}/app`);
@@ -23,6 +38,10 @@ app.listen(PORT, () => {
 // sreakkk
 app.get("/api/healthz", handlerReadiness);
 // app.get("/app", middlewareMetricsInc)
-app.get("/admin/metrics", handlerWrite)
-app.post("/admin/reset", handlerReset)
-app.post("/api/validate_chirp", handlerChirpsValidate)
+app.get("/admin/metrics", handlerWrite);
+app.post("/admin/reset", handlerReset);
+app.post("/api/validate_chirp", async (req, res, next) => {
+  Promise.resolve(handlerChirpsValidate(req, res)).catch(next);
+});
+
+app.use(errorHandler);

@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { config } from "./config.js";
+import { config } from "../config.js";
+import { error } from "console";
+import { BadRequest } from "./errorhandling.js";
 
 export function respondWithError(res: Response, code: number, message: string) {
   respondWithJSON(res, code, { error: message });
@@ -78,8 +80,9 @@ export async function handlerChirpsValidate(req: Request, res: Response) {
 
   const maxChirpLength = 140;
   if (params.body.length > maxChirpLength) {
-    respondWithError(res, 400, "Chirp is too long");
-    return;
+    throw new BadRequest("Chirp is too long. Max length is 140");
+    // respondWithError(res, 400, "Chirp is too long");
+    // return;
   }
 
   respondWithJSON(res, 200, {
