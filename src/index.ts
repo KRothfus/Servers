@@ -11,6 +11,11 @@ import { config } from "./config.js";
 import { error } from "console";
 import { errorHandler } from "./middleware/errorhandling.js";
 import { APIConfig } from "./config.js";
+import { newUserHandler } from "./middleware/users.js";
+import { chirpHandler } from "./middleware/chirps.js";
+import { migrationHandler } from "./query/index.js";
+import { allChirpsHandler } from "./query/allchirps.js";
+import { chirpsByIDHandler } from "./query/chirpsbyid.js";
 const app = express();
 const PORT = 8080;
 
@@ -23,6 +28,7 @@ function envThrow(key: APIConfig){
   return
 }
 envThrow(config);
+await migrationHandler();
 app.use(middlewareLogResponses);
 app.use("/app", middlewareMetricsInc);
 app.use(express.json());
@@ -39,9 +45,12 @@ app.listen(PORT, () => {
 app.get("/api/healthz", handlerReadiness);
 // app.get("/app", middlewareMetricsInc)
 app.get("/admin/metrics", handlerWrite);
+app.get("/api/chirps", allChirpsHandler);
+app.get("/api/chirps/:chirpID", chirpsByIDHandler);
 app.post("/admin/reset", handlerReset);
 app.post("/api/validate_chirp", async (req, res, next) => {
   Promise.resolve(handlerChirpsValidate(req, res)).catch(next);
 });
-
+app.post("/api/users", newUserHandler);
+app.post("/api/chirps", chirpHandler)
 app.use(errorHandler);

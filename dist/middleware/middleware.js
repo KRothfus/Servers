@@ -1,5 +1,7 @@
 import { config } from "../config.js";
 import { BadRequest } from "./errorhandling.js";
+import { db } from "../query/index.js";
+import { users } from "../query/schema.js";
 export function respondWithError(res, code, message) {
     respondWithJSON(res, code, { error: message });
 }
@@ -38,8 +40,14 @@ export function handlerWrite(req, res) {
     // streak 10
 }
 export function handlerReset(req, res) {
-    config.fileserverHits = 0;
-    handlerWrite(req, res);
+    if (config.platform === "dev") {
+        config.fileserverHits = 0;
+        db.delete(users).execute();
+        handlerWrite(req, res);
+    }
+    else {
+        res.status(403).json({ error: "403 Forbidden" });
+    }
 }
 function cleanedBody(body) {
     const splitBody = body.split(" ");

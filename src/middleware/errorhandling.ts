@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from "express";
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
     console.error(err.stack || err);
-
     if (err instanceof BadRequest) {
         return res.status(400).send({error: err.message});
     } else if (err instanceof NotFoundError) {

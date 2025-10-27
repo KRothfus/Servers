@@ -6,4 +6,8 @@ if (!dbURL) {
 export const config = {
     fileserverHits: 0,
     dbURL: dbURL,
+    migrationConfig: {
+        migrationsFolder: "dist/migrations",
+    },
+    platform: process.env.PLATFORM || "dev",
 };

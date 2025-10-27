@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { config } from "../config.js";
 import { error } from "console";
 import { BadRequest } from "./errorhandling.js";
+import { db } from "../query/index.js";
+import { users } from "../query/schema.js";
 
 export function respondWithError(res: Response, code: number, message: string) {
   respondWithJSON(res, code, { error: message });
@@ -56,8 +58,13 @@ export function handlerWrite(req: Request, res: Response) {
 }
 
 export function handlerReset(req: Request, res: Response) {
+  if (config.platform === "dev"){
   config.fileserverHits = 0;
+  db.delete(users).execute();
   handlerWrite(req, res);
+  } else {
+    res.status(403).json({ error: "403 Forbidden" });
+  }
 }
 
 function cleanedBody(body: string): string {
