@@ -52,5 +52,6 @@ app.post("/api/validate_chirp", async (req, res, next) => {
   Promise.resolve(handlerChirpsValidate(req, res)).catch(next);
 });
 app.post("/api/users", newUserHandler);
+app.post("/api/login", loginHandler);
 app.post("/api/chirps", chirpHandler)
 app.use(errorHandler);

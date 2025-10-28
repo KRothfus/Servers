@@ -1,5 +1,9 @@
 import { argon2d } from "argon2";
-
+import { Request, Response } from "express";
+import { db } from "./query";
+import { users } from "./query/schema";
+import { eq } from "drizzle-orm";
+import { check } from "drizzle-orm/gel-core";
 
 export async function hashPassword(password: string): Promise<string> {
     // Dummy hash function for illustration; replace with a real hashing algorithm
@@ -23,3 +27,14 @@ export async function checkPasswordHash(password: string, hash: string): Promise
         throw new Error("Password verification failed");
     }
     }
+
+
+export async function loginHandler(req: Request, res: Response): Promise<boolean> {
+const password = req.body.password;
+const email = req.body.email;
+const dbHashedPassword = await db.select().from(users).where(eq(users.email, email)).limit(1);
+await checkPasswordHash(password, dbHashedPassword[0].hashedPassword);
+
+res.status(200).json({ message: `Login attempted for email: ${email}` });
+return true;
+}
