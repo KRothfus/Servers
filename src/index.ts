@@ -16,6 +16,7 @@ import { chirpHandler } from "./middleware/chirps.js";
 import { migrationHandler } from "./query/index.js";
 import { allChirpsHandler } from "./query/allchirps.js";
 import { chirpsByIDHandler } from "./query/chirpsbyid.js";
+import { loginHandler } from "./auth.js";
 const app = express();
 const PORT = 8080;
 
