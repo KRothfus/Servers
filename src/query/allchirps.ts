@@ -1,5 +1,5 @@
 import { asc } from "drizzle-orm";
-import {chirps} from "../query/schema.js";
+import {chirps} from "./schema.js";
 import { db } from "./index.js";
 import { Response, Request, NextFunction } from "express";
 
