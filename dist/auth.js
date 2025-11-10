@@ -32,14 +32,23 @@ export async function loginHandler(req, res) {
         return false;
     }
     try {
-        const dbHashedPassword = await db.select().from(users).where(eq(users.email, email)).limit(1);
+        const dbHashedPassword = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
         const passwordGood = await checkPasswordHash(password, dbHashedPassword[0].hashedPassword);
-        res.status(200).json({
-            id: dbHashedPassword[0].id,
-            email: dbHashedPassword[0].email,
-            createdAt: dbHashedPassword[0].createdAt,
-            updatedAt: dbHashedPassword[0].updatedAt,
-        });
+        if (passwordGood) {
+            res.status(200).json({
+                id: dbHashedPassword[0].id,
+                email: dbHashedPassword[0].email,
+                createdAt: dbHashedPassword[0].createdAt,
+                updatedAt: dbHashedPassword[0].updatedAt,
+            });
+        }
+        else {
+            throw new Error("Password does not match");
+        }
     }
     catch (error) {
         res.status(401).json({ error: "Incorrect email or password" });

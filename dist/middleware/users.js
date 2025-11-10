@@ -12,7 +12,6 @@ export async function newUserHandler(req, res, next) {
     const newUser = { email: userEmail.email, hashedPassword: await hashPassword(userEmail.password) };
     const result = await db.insert(users).values(newUser).returning();
     console.log(`New user registered with email: ${userEmail.email}`);
-    res.status(200).json({ message: "you made it here" });
     const userResponse = {
         id: result[0].id,
         email: result[0].email,
