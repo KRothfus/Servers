@@ -59,6 +59,11 @@ export async function loginHandler(
         email: dbHashedPassword[0].email,
         createdAt: dbHashedPassword[0].createdAt,
         updatedAt: dbHashedPassword[0].updatedAt,
+        token: makeJWT(
+          dbHashedPassword[0].id,
+          expiration,
+          process.env.JWT_SECRET || ""
+        ),
       } as UserResponse);
     } else {
       throw new Error("Password does not match");
