@@ -9,6 +9,7 @@ export type APIConfig = {
         migrationsFolder: MigrationConfig["migrationsFolder"];
     };
     platform:string;
+    secret: string;
 }
 
 const dbURL = process.env.DB_URL;
@@ -23,4 +24,5 @@ export const config: APIConfig = {
         migrationsFolder: "dist/migrations",
     },
     platform: process.env.PLATFORM || "dev",
+    secret: process.env.JWT_SECRET || "",
 }

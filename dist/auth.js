@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import { db } from "./query/index.js";
 import { users } from "./query/schema.js";
 import { eq } from "drizzle-orm";
+import jwt from "jsonwebtoken";
 export async function hashPassword(password) {
     // Dummy hash function for illustration; replace with a real hashing algorithm
     // const argon2 = require('argon2');
@@ -55,4 +56,25 @@ export async function loginHandler(req, res) {
         return false;
     }
     return true;
+}
+export function makeJWT(userID, expiresIn, secret) {
+    const payload = {
+        iss: "chirpy",
+        sub: userID,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + expiresIn,
+    };
+    return jwt.sign(payload, secret);
+}
+export function validateJWT(tokenString, secret) {
+    try {
+        const decoded = jwt.verify(tokenString, secret);
+        if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
+            throw new Error("Token has expired");
+        }
+        return decoded.sub;
+    }
+    catch (error) {
+        throw new Error("Invalid token");
+    }
 }

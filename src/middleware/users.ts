@@ -9,6 +9,7 @@ import { hashPassword } from "../auth.js";
 type UserEmail = {
   email: string;
   password: string;
+  expiresInSeconds?: number;
 };
 export type UserResponse = Omit<NewUser, 'hashedPassword'>;
 

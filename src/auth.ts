@@ -38,6 +38,7 @@ export async function loginHandler(
 ): Promise<boolean> {
   const password = req.body.password;
   const email = req.body.email;
+  const expiration = req.body.expiresInSeconds || 3600;
   if (!email || !password) {
     res.status(400).json({ error: "Email and password are required" });
     return false;
@@ -72,19 +73,40 @@ export async function loginHandler(
 
 type Payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
-function makeJWT( userID: string, expiresIn: number, secret: string): string{
-    const payload: Payload = {
-        iss: "chirpy",
-        sub: userID,
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + expiresIn,
-    };
+export function makeJWT(
+  userID: string,
+  expiresIn: number,
+  secret: string
+): string {
+  const payload: Payload = {
+    iss: "chirpy",
+    sub: userID,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + expiresIn,
+  };
 
-    jwt.sign(payload, secret);
-
-    return ""
+  return jwt.sign(payload, secret);
 }
 
-function validateJWT(tokenString: string, secret: string): string{
-    
+export function validateJWT(tokenString: string, secret: string): string {
+  try {
+    const decoded = jwt.verify(tokenString, secret) as JwtPayload;
+    if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
+      throw new Error("Token has expired");
+    }
+    return decoded.sub as string;
+  } catch (error) {
+    throw new Error("Invalid token");
+  }
+}
+
+export function getBearerToken(req: Request): string {
+  const authHeader = req.get("Authorization");
+  if (authHeader) {
+    const tokenParts = authHeader.split(" ");
+    const tokenString = tokenParts[1].trim();
+    return tokenString;
+  } else {
+    throw new Error("Authorization header is missing");
+  }
 }
