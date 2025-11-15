@@ -10,4 +10,5 @@ export const config = {
         migrationsFolder: "dist/migrations",
     },
     platform: process.env.PLATFORM || "dev",
+    secret: process.env.JWT_SECRET || "",
 };

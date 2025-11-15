@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { checkPasswordHash, hashPassword, makeJWT, validateJWT } from "../auth.js";
+import { checkPasswordHash, hashPassword, makeJWT, validateJWT, getBearerToken, } from "../auth.js";
 describe("Password Hashing", () => {
     const password1 = "correctPassword123!";
     const password2 = "anotherPassword456!";
@@ -25,5 +25,24 @@ describe("JWT Functions", () => {
     it("should throw an error for an invalid JWT", () => {
         const invalidToken = "invalid.token.string";
         expect(() => validateJWT(invalidToken, secret)).toThrow("Invalid token");
+    });
+});
+describe("Test token", () => {
+    it("should extract bearer token from request", () => {
+        const mockReq = {
+            headers: {
+                authorization: "Bearer testtoken123",
+            },
+        };
+        const token = getBearerToken(mockReq);
+        expect(token).toBe("testtoken123");
+    });
+});
+describe("Test getBearerToken with missing header", () => {
+    it("should throw an error when Authorization header is missing", () => {
+        const mockReq = {
+            headers: {},
+        };
+        expect(() => getBearerToken(mockReq)).toThrow("Authorization header is missing");
     });
 });

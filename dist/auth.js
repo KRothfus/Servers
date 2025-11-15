@@ -28,6 +28,7 @@ export async function checkPasswordHash(password, hash) {
 export async function loginHandler(req, res) {
     const password = req.body.password;
     const email = req.body.email;
+    const expiration = req.body.expiresInSeconds || 3600;
     if (!email || !password) {
         res.status(400).json({ error: "Email and password are required" });
         return false;
@@ -45,6 +46,7 @@ export async function loginHandler(req, res) {
                 email: dbHashedPassword[0].email,
                 createdAt: dbHashedPassword[0].createdAt,
                 updatedAt: dbHashedPassword[0].updatedAt,
+                token: makeJWT(dbHashedPassword[0].id, expiration, process.env.JWT_SECRET || ""),
             });
         }
         else {
@@ -76,5 +78,18 @@ export function validateJWT(tokenString, secret) {
     }
     catch (error) {
         throw new Error("Invalid token");
+    }
+}
+export function getBearerToken(req) {
+    const authHeader = req.get("Authorization");
+    if (authHeader) {
+        const tokenParts = authHeader.split(" ");
+        console.log("Token Parts:", tokenParts);
+        const tokenString = tokenParts[1].trim();
+        console.log("Extracted Token:", tokenString);
+        return tokenString;
+    }
+    else {
+        throw new Error("Authorization header is missing");
     }
 }

@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { UserResponse } from "./middleware/users.js";
 import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 export async function hashPassword(password: string): Promise<string> {
   // Dummy hash function for illustration; replace with a real hashing algorithm
@@ -64,7 +65,8 @@ export async function loginHandler(
           expiration,
           process.env.JWT_SECRET || ""
         ),
-      } as UserResponse);
+        refreshToken: makeRefreshToken(),
+      });
     } else {
       throw new Error("Password does not match");
     }
@@ -109,9 +111,15 @@ export function getBearerToken(req: Request): string {
   const authHeader = req.get("Authorization");
   if (authHeader) {
     const tokenParts = authHeader.split(" ");
+    console.log("Token Parts:", tokenParts);
     const tokenString = tokenParts[1].trim();
+    console.log("Extracted Token:", tokenString);
     return tokenString;
   } else {
     throw new Error("Authorization header is missing");
   }
+}
+
+export function makeRefreshToken(){
+  return crypto.randomBytes(32).toString('hex');
 }
