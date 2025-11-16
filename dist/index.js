@@ -8,7 +8,7 @@ import { chirpHandler } from "./middleware/chirps.js";
 import { migrationHandler } from "./query/index.js";
 import { allChirpsHandler } from "./query/allchirps.js";
 import { chirpsByIDHandler } from "./query/chirpsbyid.js";
-import { loginHandler } from "./auth.js";
+import { loginHandler, refreshHandler, revokeHandler } from "./auth.js";
 const app = express();
 const PORT = 8080;
 // Attach logging and metrics middleware before static file serving so
@@ -43,4 +43,6 @@ app.post("/api/validate_chirp", async (req, res, next) => {
 app.post("/api/users", newUserHandler);
 app.post("/api/login", loginHandler);
 app.post("/api/chirps", chirpHandler);
+app.post("/api/refresh", refreshHandler);
+app.post("/api/revoke", revokeHandler);
 app.use(errorHandler);

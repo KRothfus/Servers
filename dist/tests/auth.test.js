@@ -18,7 +18,7 @@ describe("JWT Functions", () => {
     const userID = "user123";
     const secret = "supersecretkey";
     it("should create and validate a JWT correctly", () => {
-        const token = makeJWT(userID, 3600, secret);
+        const token = makeJWT(userID, secret);
         const validatedUserID = validateJWT(token, secret);
         expect(validatedUserID).toBe(userID);
     });
