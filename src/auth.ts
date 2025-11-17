@@ -33,6 +33,7 @@ export async function checkPasswordHash(
     throw new Error("Password verification failed");
   }
 }
+// is it done yet?
 
 export async function refreshHandler(req: Request, res: Response) {
   const givenToken = getBearerToken(req);
