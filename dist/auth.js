@@ -26,6 +26,7 @@ export async function checkPasswordHash(password, hash) {
         throw new Error("Password verification failed");
     }
 }
+// is it done yet?
 export async function refreshHandler(req, res) {
     const givenToken = getBearerToken(req);
     const token = await db
@@ -92,27 +93,27 @@ export async function loginHandler(req, res) {
         }
         const expAt = new Date();
         expAt.setDate(expAt.getDate() + 60);
-        const refreshToken = {
+        const refreshToken = await db
+            .insert(refreshTokens)
+            .values({
             token: makeRefreshToken(),
             userId: dbHashedPassword[0].id,
             expiresAt: expAt,
-            revokedAt: null,
-        };
-        await db.insert(refreshTokens).values(refreshToken);
+        })
+            .returning();
         res.status(200).json({
             id: dbHashedPassword[0].id,
             email: dbHashedPassword[0].email,
             createdAt: dbHashedPassword[0].createdAt,
             updatedAt: dbHashedPassword[0].updatedAt,
             token: makeJWT(dbHashedPassword[0].id, process.env.JWT_SECRET || ""),
-            refreshToken: refreshToken.token,
+            refreshToken: refreshToken[0].token,
         });
     }
     catch (error) {
         res.status(401).json({ error: "Incorrect email or password" });
-        return false;
     }
-    return true;
+    // the error is somewhere in this handler.
 }
 export function makeJWT(userID, secret) {
     const payload = {
@@ -127,6 +128,7 @@ export function validateJWT(tokenString, secret) {
     try {
         const decoded = jwt.verify(tokenString, secret);
         if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
+            console.log('Token expired at:', decoded.exp);
             throw new Error("Token has expired");
         }
         return decoded.sub;

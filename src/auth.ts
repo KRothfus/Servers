@@ -46,7 +46,9 @@ export async function refreshHandler(req: Request, res: Response) {
     res.status(401).json({ error: "Invalid refresh token" });
     return;
   } else if (token[0].revokedAt !== null) {
-    res.status(401).json({ error: `Refresh token was revoked on ${token[0].revokedAt}` });
+    res
+      .status(401)
+      .json({ error: `Refresh token was revoked on ${token[0].revokedAt}` });
     return;
   } else if (token[0].expiresAt < new Date()) {
     res.status(401).json({ error: "Refresh token has expired" });
@@ -82,7 +84,7 @@ export async function revokeHandler(req: Request, res: Response) {
 export async function loginHandler(
   req: Request,
   res: Response
-): Promise<boolean> {
+) {
   const password = req.body.password;
   const email = req.body.email;
 
@@ -108,32 +110,33 @@ export async function loginHandler(
     if (!passwordGood) {
       throw new Error("Password does not match");
     }
-
-    const expAt = new Date();
-    expAt.setDate(expAt.getDate() + 60);
-
-    const refreshToken = {
-      token: makeRefreshToken(),
-      userId: dbHashedPassword[0].id,
-      expiresAt: expAt,
-      revokedAt: null,
-    };
-    await db.insert(refreshTokens).values(refreshToken);
-
+    
+      const expAt = new Date();
+      expAt.setDate(expAt.getDate() + 60);
+      const refreshToken = await db
+        .insert(refreshTokens)
+        .values({
+          token: makeRefreshToken(),
+          userId: dbHashedPassword[0].id,
+          expiresAt: expAt,
+        })
+        .returning();
+    
+      
     res.status(200).json({
       id: dbHashedPassword[0].id,
       email: dbHashedPassword[0].email,
       createdAt: dbHashedPassword[0].createdAt,
       updatedAt: dbHashedPassword[0].updatedAt,
       token: makeJWT(dbHashedPassword[0].id, process.env.JWT_SECRET || ""),
-      refreshToken: refreshToken.token,
+      refreshToken: refreshToken[0].token,
     });
   } catch (error) {
     res.status(401).json({ error: "Incorrect email or password" });
-    return false;
+    
   }
   // the error is somewhere in this handler.
-  return true;
+  
 }
 
 type Payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
