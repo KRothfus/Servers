@@ -46,9 +46,7 @@ export async function refreshHandler(req: Request, res: Response) {
     res.status(401).json({ error: "Invalid refresh token" });
     return;
   } else if (token[0].revokedAt !== null) {
-    res
-      .status(401)
-      .json({ error: `Refresh token was revoked on ${token[0].revokedAt}` });
+    res.status(401).json({ error: `Refresh token was revoked on ${token[0].revokedAt}` });
     return;
   } else if (token[0].expiresAt < new Date()) {
     res.status(401).json({ error: "Refresh token has expired" });
@@ -134,7 +132,7 @@ export async function loginHandler(
     res.status(401).json({ error: "Incorrect email or password" });
     return false;
   }
-
+  // the error is somewhere in this handler.
   return true;
 }
 
