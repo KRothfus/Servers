@@ -12,7 +12,7 @@ import { error } from "console";
 import { errorHandler } from "./middleware/errorhandling.js";
 import { APIConfig } from "./config.js";
 import { newUserHandler, updateUserHandler } from "./middleware/users.js";
-import { chirpHandler } from "./middleware/chirps.js";
+import { chirpHandler, deleteChirpHandler } from "./middleware/chirps.js";
 import { migrationHandler } from "./query/index.js";
 import { allChirpsHandler } from "./query/allchirps.js";
 import { chirpsByIDHandler } from "./query/chirpsbyid.js";
@@ -59,4 +59,6 @@ app.post("/api/refresh", refreshHandler)
 app.post("/api/revoke", revokeHandler)
 
 app.put("/api/users", updateUserHandler)
+
+app.delete("/api/chirps/:chirpID", deleteChirpHandler)
 app.use(errorHandler);
