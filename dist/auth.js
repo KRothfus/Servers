@@ -127,8 +127,9 @@ export function makeJWT(userID, secret) {
 export function validateJWT(tokenString, secret) {
     try {
         const decoded = jwt.verify(tokenString, secret);
+        console.log("Decoded JWT:", decoded);
         if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
-            console.log('Token expired at:', decoded.exp);
+            console.log("Token has expired");
             throw new Error("Token has expired");
         }
         return decoded.sub;
@@ -141,9 +142,7 @@ export function getBearerToken(req) {
     const authHeader = req.get("Authorization");
     if (authHeader) {
         const tokenParts = authHeader.split(" ");
-        console.log("Token Parts:", tokenParts);
         const tokenString = tokenParts[1].trim();
-        console.log("Extracted Token:", tokenString);
         return tokenString;
     }
     else {

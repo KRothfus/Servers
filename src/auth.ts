@@ -81,10 +81,7 @@ export async function revokeHandler(req: Request, res: Response) {
   return res.sendStatus(204);
 }
 
-export async function loginHandler(
-  req: Request,
-  res: Response
-) {
+export async function loginHandler(req: Request, res: Response) {
   const password = req.body.password;
   const email = req.body.email;
 
@@ -110,19 +107,18 @@ export async function loginHandler(
     if (!passwordGood) {
       throw new Error("Password does not match");
     }
-    
-      const expAt = new Date();
-      expAt.setDate(expAt.getDate() + 60);
-      const refreshToken = await db
-        .insert(refreshTokens)
-        .values({
-          token: makeRefreshToken(),
-          userId: dbHashedPassword[0].id,
-          expiresAt: expAt,
-        })
-        .returning();
-    
-      
+
+    const expAt = new Date();
+    expAt.setDate(expAt.getDate() + 60);
+    const refreshToken = await db
+      .insert(refreshTokens)
+      .values({
+        token: makeRefreshToken(),
+        userId: dbHashedPassword[0].id,
+        expiresAt: expAt,
+      })
+      .returning();
+
     res.status(200).json({
       id: dbHashedPassword[0].id,
       email: dbHashedPassword[0].email,
@@ -133,10 +129,8 @@ export async function loginHandler(
     });
   } catch (error) {
     res.status(401).json({ error: "Incorrect email or password" });
-    
   }
   // the error is somewhere in this handler.
-  
 }
 
 type Payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
@@ -155,7 +149,9 @@ export function makeJWT(userID: string, secret: string): string {
 export function validateJWT(tokenString: string, secret: string): string {
   try {
     const decoded = jwt.verify(tokenString, secret) as JwtPayload;
+    console.log("Decoded JWT:", decoded);
     if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
+      console.log("Token has expired");
       throw new Error("Token has expired");
     }
     return decoded.sub as string;
@@ -168,9 +164,7 @@ export function getBearerToken(req: Request): string {
   const authHeader = req.get("Authorization");
   if (authHeader) {
     const tokenParts = authHeader.split(" ");
-    console.log("Token Parts:", tokenParts);
     const tokenString = tokenParts[1].trim();
-    console.log("Extracted Token:", tokenString);
     return tokenString;
   } else {
     throw new Error("Authorization header is missing");

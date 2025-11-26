@@ -2,7 +2,8 @@ import { unique } from "drizzle-orm/gel-core";
 import { Request, Response, NextFunction } from "express";
 import { db } from "../query/index.js";
 import { NewUser, users } from "../query/schema.js";
-import { hashPassword } from "../auth.js";
+import { getBearerToken, hashPassword } from "../auth.js";
+import { eq } from "drizzle-orm";
 
 
 
@@ -41,4 +42,29 @@ export async function newUserHandler(
 
 }
 
-
+export async function updateUserHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+){
+  const accessToken = req.headers.authorization;
+  if (!accessToken) {
+    return res.status(401).json({ error: "Authorization header is missing" });
+  }
+  
+  const userEmail: UserEmail = req.body;
+  if (!userEmail || !userEmail.email) {
+    res.status(400).json({ error: "Email is required" });
+  }
+  try{
+  const hashedPassword = await hashPassword(userEmail.password)
+  await db
+    .update(users)
+    .set({ hashedPassword: hashedPassword, updatedAt: new Date() })
+    .where(eq(users.email,userEmail.email));
+  } catch (error) {
+    return next(error);
+  }
+  type UserResponse = Omit<UserEmail, 'password'>
+  return res.status(200).json({ user: { email: userEmail.email } as UserResponse });
+}

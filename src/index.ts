@@ -11,7 +11,7 @@ import { config } from "./config.js";
 import { error } from "console";
 import { errorHandler } from "./middleware/errorhandling.js";
 import { APIConfig } from "./config.js";
-import { newUserHandler } from "./middleware/users.js";
+import { newUserHandler, updateUserHandler } from "./middleware/users.js";
 import { chirpHandler } from "./middleware/chirps.js";
 import { migrationHandler } from "./query/index.js";
 import { allChirpsHandler } from "./query/allchirps.js";
@@ -57,4 +57,6 @@ app.post("/api/login", loginHandler);
 app.post("/api/chirps", chirpHandler)
 app.post("/api/refresh", refreshHandler)
 app.post("/api/revoke", revokeHandler)
+
+app.put("/api/users", updateUserHandler)
 app.use(errorHandler);
